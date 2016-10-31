@@ -1,0 +1,177 @@
+html {
+    background: url(../images/red-background2.jpg) no-repeat center center fixed; 
+    background-size: cover;
+}
+
+header {
+    width: 100%;
+    height: 200px;
+    color: red;
+    font-family: 'Handlee', cursive;
+    font-size: 60pt;
+    text-align: center;
+}
+
+figure {
+	float: left;
+    margin-right: 0;
+    font-size: 10pt;
+    text-align: center;
+}
+
+h1 {
+    font-family: 'Handlee', cursive;
+    font-size: 84pt;
+    text-align: center; 
+}
+
+h2 {
+    font-size: 24pt;
+}
+
+h3 {
+    font-size: 24pt;
+    color: white;
+}
+
+table {
+
+}
+
+#header-title {
+    height: 180px;
+    margin-top: 14px;
+    margin-left: 0;
+    margin-right: 95pt;
+    width: 74%;
+    float: right;
+    text-align: center;
+    font-family: 'Handlee', cursive;
+    font-size: 72pt;
+}
+
+#date-time {
+    
+}
+
+#date-time {
+    text-align: center;
+    font-size: 32px;
+}
+
+#item-title {
+    width: 100%;
+}
+
+#weather {
+    width: 100%;
+    text-align: center;
+    color: white;
+    align-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    border-bottom: 1px solid black;
+}
+
+#wunderground {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: bold;
+    
+}
+
+#current {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: bold;
+    color: #FDF902;
+}
+#weather-title {
+    font-size: 24pt;
+}
+
+#location {
+    font-size: 14pt;
+}
+
+#updated {
+    font=size: 10pt;
+}
+
+#left-col {
+    float: left;
+    width: 40%;
+    padding-top: 5px;
+}
+
+#right-col {
+    float: right;
+    width: 60%;
+    padding-top: 5px;
+}
+
+#qotd {
+    width: 100%;
+    text-align: center;
+    align-content: center;
+    margin: auto;
+}
+
+#quote {
+    text-align: center;
+    color: #FDF902;
+    font-size: 18pt;
+}
+
+#qsource {
+    text-align: right;
+    color: #FDF902;
+    font-size: 12pt;
+    font-style: italic
+}
+
+#wotd {
+    border-top: 1px solid black;
+    padding-top: 20px;
+    width: 100%;
+    text-align: center;
+    margin: auto;
+}
+
+#word {
+    text-align: center;
+    color: #FDF902;
+    font-size: 18pt;
+    font-weight: bold;
+}
+
+#definition {
+    text-align: left;
+    color: #FDF902;
+    font-size: 12pt;
+    font-style: oblique;
+}
+
+#nyt {
+    border-top: 1px solid black;
+    padding-top: 20px;
+    width: 100%;
+}
+
+#calendar {
+    width: 100%;
+    padding-left: 3%;
+    padding-top: 15px;
+}
+
+#provider {
+    font-size: 10;
+}
+
+#source {
+    font-size: 10pt;
+    font-style: italic;
+    font-weight: lighter;
+}
