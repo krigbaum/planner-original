@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"os"
 	"strings"
-    "time"
 )
 
 type wotd struct {
 	word       string
-	def        string
+	definition string
 }
 
 type qotd struct {
@@ -31,9 +30,6 @@ type weather struct {
 	pressure    string
 	visibility  string
 }
-
-const qotdURL = "http://quotes.rest/qod.xml"
-const wotdURL = "http://www.macmillandictionary.com/us/wotd/wotdrss.xml"
 
 func extractWeather(text string, str string, rep int) string {
 	loc := 0
@@ -79,7 +75,7 @@ func getWeather() weather {
 	fieldName = "<observation_time>"
 	updated := extractWeather(string(b), fieldName, 1)
 	w.updated = updated
-
+	//==============================================
 	fieldName = "<weather>"
 	conditions := extractWeather(string(b), fieldName, 1)
 	w.conditions = conditions
@@ -114,79 +110,15 @@ func extractWOTD(text string, str string, rep int) string {
 		loc = strings.Index(text[start:], str) + len(str)
 		start = start + loc
 	}
-    
-   end := strings.Index(text[start:len(text)], "</")
-   end = start + end
-   return text[start:end]
+
+	end := strings.Index(text[start:], "</")
+	end = start + end
+	return text[start:end]
 }
 
 func getWOTD() wotd {
-    var w wotd
-    url := wotdURL
-   
-   // Initial Run
-    resp, err := http.Get(url)
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
-        os.Exit(1)
-    }
-    b, err := ioutil.ReadAll(resp.Body)
-    resp.Body.Close()
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
-        os.Exit(1)
-    }
-    fieldName := "<title>"
-    w.word = extractWOTD(string(b), fieldName, 2)
-
-    fieldName = "<summary>"
-    w.def = extractWOTD(string(b), fieldName, 1)
-    
-    fmt.Printf("%v: %s\n", time.Now(), w.word)
-    //==================================
-   
-    ticker := time.NewTicker(time.Minute * 5)
-    for _ = range ticker.C {
-        
-        resp, err = http.Get(url)
-        if err != nil {
-            fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
-            os.Exit(1)
-        }
-        b, err = ioutil.ReadAll(resp.Body)
-        resp.Body.Close()
-        if err != nil {
-            fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
-            os.Exit(1)
-        }
-        fieldName = "<title>"
-        w.word = extractWOTD(string(b), fieldName, 2)
-    
-        fieldName = "<summary>"
-        w.def = extractWOTD(string(b), fieldName, 1)
-        
-        fmt.Printf("%v: %s\n", time.Now(), w.word)
-    
-    }
-    return w
-}
-
-func extractQOTD(text string, str string, rep int) string {
-	loc := 0
-	start := 0
-	for i := 1; i <= rep; i++ {
-		loc = strings.Index(text[start:], str) + len(str)
-		start = start + loc
-	}
-    
-   end := strings.Index(text[start:len(text)], "</")
-   end = start + end
-   return text[start:end]
-}
-
-func getQOTD() qotd {
-	var q qotd
-	url := "http://quotes.rest/qod.xml"
+	var w wotd
+	url := "https://wordsmith.org/awad/rss1.xml"
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
@@ -198,13 +130,82 @@ func getQOTD() qotd {
 		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
 		os.Exit(1)
 	}
-    fieldName := "<quote>"
-	q.quote = "\"" + extractQOTD(string(b), fieldName, 1) + "\""
- 
-    fieldName = "<author>"
-    q.source = extractQOTD(string(b), fieldName, 1)
-	
-    return q
+	//fmt.Printf("\n\n\n%s\n", b)
+
+	fieldName := "<title>"
+	wotd := extractWOTD(string(b), fieldName, 2)
+	w.word = wotd
+
+	fieldName = "<description>"
+	definition := extractWOTD(string(b), fieldName, 2)
+	w.definition = definition
+
+	return w
+}
+
+func extractQOTD(text string, str string, rep int) string {
+	loc := 0
+	start := 0
+	for i := 1; i <= rep; i++ {
+		loc = strings.Index(text[start:], str) + len(str)
+		start = start + loc
+	}
+
+	end := strings.Index(text[start:], "</")
+	end = start + end
+	return text[start:end]
+}
+
+func getQOTD() qotd {
+	var q qotd
+	url := "https://feeds.feedburner.com/brainyquote/QUOTEBR"
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
+		os.Exit(1)
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
+		os.Exit(1)
+	}
+	//fmt.Printf("\n\n\n%s\n", b)
+
+	fieldName := "<title>"
+	source := extractQOTD(string(b), fieldName, 3)
+	q.source = source
+
+	fieldName = "<description>"
+	quote := extractQOTD(string(b), fieldName, 3)
+	q.quote = quote
+
+	return q
+}
+
+func write(file string, word string, definition string) int {
+	f, err := os.Create(file)
+	if err != nil {
+		//fmt.Printf("Error opening file \"%s\": %d\n", file)
+		return 1
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(word + "\n")
+	if err != nil {
+		//fmt.Printf("Error writing to file \"%s\": %d\n", file)
+		return 2
+	}
+
+	//fmt.Printf("wrote %d bytes\n", n)
+
+	_, err = f.WriteString(definition + "\n")
+	if err != nil {
+		//fmt.Printf("Error writing to file \"%s\": %d\n", file)
+		return 2
+	}
+	//fmt.Printf("wrote %d bytes\n", n)
+	return 0
 }
 
 func replaceByID(src string, old string, new string) string {
@@ -224,11 +225,15 @@ func replaceByID(src string, old string, new string) string {
 }
 
 func main() {
-	//entry := getWOTD()
-    getWOTD()
-    select{}
-/*
+	entry := getWOTD()
+	//fmt.Println(entry.word)
+	//fmt.Println(entry.definition)
+	write("wotd.txt", entry.word, entry.definition)
+
 	quote := getQOTD()
+	//fmt.Println(quote.source)
+	//fmt.Println("" + quote.quote + "")
+	write("qotd.txt", quote.quote, quote.source)
 
 	weather := getWeather()
 	location := fmt.Sprintf("%s (%s N / %s W)", weather.location, weather.latitude, weather.longitude)
@@ -238,6 +243,7 @@ func main() {
 	//fmt.Printf("Wind:                %s\n", weather.wind)
 	//fmt.Printf("Barometric Presure:  %s\n", weather.pressure)
 	//fmt.Printf("Visibilty:           %s mi\n", weather.visibility)
+	write("weather.txt", weather.location, weather.updated)
 
 	file := "c:/users/lekrigbaum/Desktop/Family Planner/index.html"
 	src, err := ioutil.ReadFile(file)
@@ -246,7 +252,11 @@ func main() {
 	}
 
 	newfile := replaceByID(string(src), "id=\"quote\">", quote.quote)
+	//fmt.Printf("\n\n=== First: replaced quote ========================================================\n")
+	//fmt.Println(newfile)
 	newfile = replaceByID(newfile, "id=\"qsource\">", quote.source)
+	//fmt.Printf("\n\n=== Second: replaced source ======================================================\n")
+	//fmt.Println(newfile)
 	newfile = replaceByID(newfile, "id=\"word\">", entry.word)
 	newfile = replaceByID(newfile, "id=\"definition\">", entry.definition)
 
@@ -262,5 +272,4 @@ func main() {
 	if err != nil {
 		fmt.Printf("Error writing to file %s: %v\n", file, err)
 	}
-*/
 }
