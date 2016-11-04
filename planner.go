@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+    "io/ioutil"
 	"net/http"
 	"os"
 	"strings"
+	"strconv"
     "time"
 )
 
@@ -32,8 +33,24 @@ type weather struct {
 	visibility  string
 }
 
+type nyt struct {
+	title1	string
+	description1 	string
+	title2	string
+	description2 	string
+	title3	string
+	description3 	string
+}
+
 const qotdURL = "http://quotes.rest/qod.xml"
 const wotdURL = "http://www.macmillandictionary.com/us/wotd/wotdrss.xml"
+const weatherURL = "http://w1.weather.gov/xml/current_obs/KLAF.xml"
+const nytURL = "http://rss.nytimes.com/services/xml/rss/nyt/US.xml"
+const wotdReloadInterval = 5
+const qotdReloadInterval = 5
+const weatherReloadInterval = 5
+const nytReloadInterval = 5
+const HTMLFile = "/home/krigbaum/devel/go/src/github.com/krigbaum/planner/FamilyPlanner/index.html"
 
 func extractWeather(text string, str string, rep int) string {
 	loc := 0
@@ -48,9 +65,10 @@ func extractWeather(text string, str string, rep int) string {
 	return text[start:end]
 }
 
-func getWeather() weather {
-	var w weather
-	url := "http://w1.weather.gov/xml/current_obs/KLAF.xml"
+func getWeather(memoryFile string) {
+	url := weatherURL
+    var w weather
+    
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
@@ -62,49 +80,72 @@ func getWeather() weather {
 		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
 		os.Exit(1)
 	}
-	//fmt.Printf("\n\n\n%s\n", b)
-
 	fieldName := "<location>"
-	location := extractWeather(string(b), fieldName, 1)
-	w.location = location
+	w.location = extractWeather(string(b), fieldName, 1)
 
 	fieldName = "<latitude>"
-	latitude := extractWeather(string(b), fieldName, 1)
-	w.latitude = latitude
-
+	w.latitude = extractWeather(string(b), fieldName, 1)
+	lat, _ := strconv.ParseFloat(w.latitude, 64)
+	latitude := strconv.FormatFloat(lat, 'f', 2, 64)
+	fmt.Printf("latitude = %s (%T)\n", latitude, latitude)
+	
 	fieldName = "<longitude>"
-	longitude := extractWeather(string(b), fieldName, 1)
-	w.longitude = longitude[1:]
+	w.longitude = extractWeather(string(b), fieldName, 1)
+	long, _ := strconv.ParseFloat(w.longitude, 64)
+	longitude := strconv.FormatFloat(long, 'f', 2, 64)
+	fmt.Printf("latitude = %s (%T)\n", longitude, longitude)
+
+	location := fmt.Sprintf("%s (%s N / %s W)", w.location, latitude, longitude)
 
 	fieldName = "<observation_time>"
-	updated := extractWeather(string(b), fieldName, 1)
-	w.updated = updated
+	w.updated = extractWeather(string(b), fieldName, 1)
 
 	fieldName = "<weather>"
-	conditions := extractWeather(string(b), fieldName, 1)
-	w.conditions = conditions
-
+	w.conditions = extractWeather(string(b), fieldName, 1)
+	
 	fieldName = "<temperature_string>"
-	temperature := extractWeather(string(b), fieldName, 1)
-	w.temperature = temperature
+	w.temperature = extractWeather(string(b), fieldName, 1)
 
 	fieldName = "<relative_humidity>"
-	humidity := extractWeather(string(b), fieldName, 1)
-	w.humidity = humidity
+	w.humidity = extractWeather(string(b), fieldName, 1)
 
 	fieldName = "<wind_string>"
-	wind := extractWeather(string(b), fieldName, 1)
-	w.wind = wind
+	w.wind = extractWeather(string(b), fieldName, 1)
 
 	fieldName = "<pressure_in>"
-	pressure := extractWeather(string(b), fieldName, 1)
-	w.pressure = pressure
+	w.pressure = extractWeather(string(b), fieldName, 1)
 
 	fieldName = "<visibility_mi>"
-	visibility := extractWeather(string(b), fieldName, 1)
-	w.visibility = visibility
+	w.visibility = extractWeather(string(b), fieldName, 1)
+    
+    //fmt.Printf("Type of w.latitude is: %T\n", w.latitude)
+    //fmt.Println("Location: ", location)
 
-	return w
+    memoryFile = replaceByID(memoryFile, "id=\"location\">", location)
+	memoryFile = replaceByID(memoryFile, "id=\"updated\">", w.updated)
+	memoryFile = replaceByID(memoryFile, "id=\"cond\">", w.conditions)
+	memoryFile = replaceByID(memoryFile, "id=\"temp\">", w.temperature)
+	memoryFile = replaceByID(memoryFile, "id=\"humid\">", w.humidity)
+	memoryFile = replaceByID(memoryFile, "id=\"pressure\">", w.pressure)
+	memoryFile = replaceByID(memoryFile, "id=\"visibility\">", w.visibility)
+	memoryFile = replaceByID(memoryFile, "id=\"wind\">", w.wind)
+
+	err = ioutil.WriteFile(HTMLFile, []byte(memoryFile), 0644)
+	if err != nil {
+		fmt.Printf("Error writing to file %s: %v\n", HTMLFile, err)
+	}
+}
+
+func Weather(memoryFile string) {
+    // Initial Weather load on startup
+    getWeather(memoryFile)
+
+    //==================================
+    // Repeat Weather load every weatherdReloadInterval
+    ticker := time.NewTicker(time.Minute * weatherReloadInterval)
+    for range ticker.C {
+        getWeather(memoryFile)
+    }
 }
 
 func extractWOTD(text string, str string, rep int) string {
@@ -120,11 +161,10 @@ func extractWOTD(text string, str string, rep int) string {
    return text[start:end]
 }
 
-func getWOTD() wotd {
-    var w wotd
+func getWOTD(memoryFile string) {
     url := wotdURL
-   
-   // Initial Run
+    var w wotd
+    
     resp, err := http.Get(url)
     if err != nil {
         fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
@@ -136,39 +176,35 @@ func getWOTD() wotd {
         fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
         os.Exit(1)
     }
+    
     fieldName := "<title>"
     w.word = extractWOTD(string(b), fieldName, 2)
 
     fieldName = "<summary>"
     w.def = extractWOTD(string(b), fieldName, 1)
     
-    fmt.Printf("%v: %s\n", time.Now(), w.word)
+    fmt.Printf("%v: Word - %s\n", time.Now(), w.word)
+    fmt.Printf("%v: Def - %s\n\n", time.Now(), w.def)
+    
+    memoryFile = replaceByID(memoryFile, "id=\"word\">", w.word)
+	memoryFile = replaceByID(memoryFile, "id=\"definition\">", w.def)
+    
+    err = ioutil.WriteFile(HTMLFile, []byte(memoryFile), 644)
+    if err != nil {
+		fmt.Printf("Error writing to file %s: %v\n", HTMLFile, err)
+	}
+}
+
+func WOTD(memoryFile string) {
+    // Initial WOTD load on startup
+    getWOTD(memoryFile)
+
     //==================================
-   
-    ticker := time.NewTicker(time.Minute * 5)
-    for _ = range ticker.C {
-        
-        resp, err = http.Get(url)
-        if err != nil {
-            fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
-            os.Exit(1)
-        }
-        b, err = ioutil.ReadAll(resp.Body)
-        resp.Body.Close()
-        if err != nil {
-            fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
-            os.Exit(1)
-        }
-        fieldName = "<title>"
-        w.word = extractWOTD(string(b), fieldName, 2)
-    
-        fieldName = "<summary>"
-        w.def = extractWOTD(string(b), fieldName, 1)
-        
-        fmt.Printf("%v: %s\n", time.Now(), w.word)
-    
+    // Repeat WOTD load every wotdReloadInterval
+    ticker := time.NewTicker(time.Minute * wotdReloadInterval)
+    for range ticker.C {
+        getWOTD(memoryFile)
     }
-    return w
 }
 
 func extractQOTD(text string, str string, rep int) string {
@@ -184,9 +220,10 @@ func extractQOTD(text string, str string, rep int) string {
    return text[start:end]
 }
 
-func getQOTD() qotd {
-	var q qotd
-	url := "http://quotes.rest/qod.xml"
+func getQOTD(memoryFile string) {
+	url := qotdURL
+    var q qotd
+    
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
@@ -198,13 +235,116 @@ func getQOTD() qotd {
 		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
 		os.Exit(1)
 	}
+
     fieldName := "<quote>"
 	q.quote = "\"" + extractQOTD(string(b), fieldName, 1) + "\""
  
     fieldName = "<author>"
     q.source = extractQOTD(string(b), fieldName, 1)
 	
-    return q
+    fmt.Printf("%v: Quote - %s\n", time.Now(), q.quote)
+    fmt.Printf("%v: Src - %s\n\n", time.Now(), q.source)
+    
+    memoryFile = replaceByID(memoryFile, "id=\"quote\">", q.quote)
+	memoryFile = replaceByID(memoryFile, "id=\"qsource\">", q.source)
+    
+    err = ioutil.WriteFile(HTMLFile,[]byte(memoryFile), 644)
+    if err != nil {
+		fmt.Printf("Error writing to file %s: %v\n", HTMLFile, err)
+	}
+}
+
+func QOTD(memoryFile string) {
+    // Initial WOTD load on startup
+    fmt.Println("Start QOTD()")
+    getQOTD(memoryFile)
+
+    //==================================
+    // Repeat WOTD load every qotdReloadInterval
+    ticker := time.NewTicker(time.Minute * qotdReloadInterval)
+    for range ticker.C {
+        getQOTD(memoryFile)
+    }
+}
+
+
+func extractNYT(text string, str string, rep int) string {
+	loc := 0
+	start := 0
+	for i := 1; i <= rep; i++ {
+		loc = strings.Index(text[start:], str) + len(str)
+		start = start + loc
+	}
+    
+   end := strings.Index(text[start:len(text)], "</")
+   end = start + end
+   return text[start:end]
+}
+
+func getNYT(memoryFile string) {
+	url := nytURL
+    var n nyt
+    
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
+		os.Exit(1)
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
+		os.Exit(1)
+	}
+
+    fieldName := "<title>"
+	n.title1 = "\"" + extractNYT(string(b), fieldName, 3) + "\""
+ 
+    fieldName = "<description>"
+    n.description1 = extractQOTD(string(b), fieldName, 1)
+
+    fieldName = "<title>"
+	n.title2 = "\"" + extractNYT(string(b), fieldName, 4) + "\""
+ 
+    fieldName = "<description>"
+    n.description2 = extractQOTD(string(b), fieldName, 2)
+
+    fieldName = "<title>"
+	n.title3 = "\"" + extractNYT(string(b), fieldName, 5) + "\""
+ 
+    fieldName = "<description>"
+    n.description3 = extractQOTD(string(b), fieldName, 3)
+	
+    fmt.Printf("%v: Quote - %s\n", time.Now(), n.title1)
+    fmt.Printf("%v: Src - %s\n\n", time.Now(), n.description1)
+    fmt.Printf("%v: Quote - %s\n", time.Now(), n.title2)
+    fmt.Printf("%v: Src - %s\n\n", time.Now(), n.description2)
+    fmt.Printf("%v: Quote - %s\n", time.Now(), n.title3)
+    fmt.Printf("%v: Src - %s\n\n", time.Now(), n.description3)
+    
+    memoryFile = replaceByID(memoryFile, "id=\"title1\">", n.title1)
+	memoryFile = replaceByID(memoryFile, "id=\"desc1\">", n.description1)
+	memoryFile = replaceByID(memoryFile, "id=\"title2\">", n.title2)
+	memoryFile = replaceByID(memoryFile, "id=\"desc2\">", n.description2)
+	memoryFile = replaceByID(memoryFile, "id=\"title3\">", n.title3)
+	memoryFile = replaceByID(memoryFile, "id=\"desc3\">", n.description3)
+    
+    err = ioutil.WriteFile(HTMLFile,[]byte(memoryFile), 644)
+    if err != nil {
+		fmt.Printf("Error writing to file %s: %v\n", HTMLFile, err)
+	}
+}
+
+func NYT(memoryFile string) {
+    // Initial WOTD load on startup
+    getNYT(memoryFile)
+
+    //==================================
+    // Repeat NYT load every qotdReloadInterval
+    ticker := time.NewTicker(time.Minute * nytReloadInterval)
+    for range ticker.C {
+        getNYT(memoryFile)
+    }
 }
 
 func replaceByID(src string, old string, new string) string {
@@ -212,26 +352,34 @@ func replaceByID(src string, old string, new string) string {
 	i := strings.Index(src, old)
 	i = i + len(old)
 	substr1 := src[:i]
-	fmt.Println("substr1[len(substr1) - 25:] = ", substr1[len(substr1)-25:])
-	fmt.Println()
+	//fmt.Println("substr1[len(substr1) - 25:] = ", substr1[len(substr1)-25:])
+	//fmt.Println()
 	substr2 := src[i:]
-	fmt.Println("substr2[:25] = ", substr2[:25])
+	//fmt.Println("substr2[:25] = ", substr2[:25])
 	i = strings.Index(substr2, "</")
-	fmt.Println("i = ", i)
+	//fmt.Println("i = ", i)
 	substr2 = substr2[i:]
 	src = substr1 + new + substr2
 	return src
 }
 
 func main() {
-	//entry := getWOTD()
-    getWOTD()
+	file := HTMLFile
+	src, err := ioutil.ReadFile(file)
+	if err != nil {
+		fmt.Printf("Error reading file %s: %v\n", file, err)
+	}
+    go Weather(string(src))
+    //go QOTD(string(src))
+    //go WOTD(string(src))
+    //go NYT(string (src))
+    
     select{}
 /*
 	quote := getQOTD()
 
 	weather := getWeather()
-	location := fmt.Sprintf("%s (%s N / %s W)", weather.location, weather.latitude, weather.longitude)
+	//location := fmt.Sprintf("%s (%s N / %s W)", weather.location, weather.latitude, weather.longitude)
 	//fmt.Printf("Observered:          %s\n", weather.updated)
 	//fmt.Printf("Temperature:         %s\n", weather.temperature)
 	//fmt.Printf("Humidity:            %s%%\n", weather.humidity)
@@ -247,6 +395,7 @@ func main() {
 
 	newfile := replaceByID(string(src), "id=\"quote\">", quote.quote)
 	newfile = replaceByID(newfile, "id=\"qsource\">", quote.source)
+    
 	newfile = replaceByID(newfile, "id=\"word\">", entry.word)
 	newfile = replaceByID(newfile, "id=\"definition\">", entry.definition)
 

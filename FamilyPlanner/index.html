@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <title>Family Planner</title>
+        <link rel="stylesheet" type="text/css" href="css/planner.css">
+        <script type="text/javascript" src="js/planner.js"></script>
+        <script type="text/javascript" src="js/date.js"></script>
+        <link href='https://fonts.googleapis.com/css?family=Handlee' rel='stylesheet' type='text/css'>
+    </head>
+
+    <body>
+        <header>
+           <figure>
+                <img src="images/wartree.png" alt="Wartree Logo" />
+                <figcaption>Wartree</figcaption>
+            </figure>
+            <div id="header-title">
+                Family Planner
+                <h2><span id="date">DATE</span>&nbsp;/&nbsp;<span id="time">TIME</span></h2>
+                <script>getDate()</script>
+                <script>getTime()</script>
+            </div>
+        </header>
+       
+        <main>
+           <hr>
+           <div id="left-col">
+            <div id="weather">
+                <table id="wunderground">
+                   <tr>
+                       <td id="weather-title">Local Weather</td>
+                   </tr>
+                   <tr>
+                       <td id="location">Lafayette, Purdue University Airport, IN (40.41 N / -86.95 W)</td>
+                   </tr>
+                   <tr>
+                       <td id="updated">Last Updated on Nov 4 2016, 1:54 pm EDT</td>
+                   </tr>
+                </table>
+                <br>
+                <table id="current">
+                    <tr>
+                        <td>Current Conditions :</td>
+                        <td id="cond">Fair</td>   
+                    </tr>
+                    <tr>
+                        <td>Temperature :</td>
+                        <td id="temp">57.0 F (13.9 C)</td>
+                    </tr>
+                    <tr>
+                        <td>Humidity :</td>
+                        <td id="humid">51</td>
+                    </tr>
+                    <tr>
+                        <td>Barometric Pressure :</td>
+                        <td id="pressure">30.41</td>
+                    </tr>
+                    <tr>
+                        <td>Visibility :</td>
+                        <td id="visibility">10.00</td>
+                    </tr>
+                    <tr>
+                        <td>Wind :</td>
+                        <td id="wind">Variable at 3.5 MPH (3 KT)</td>
+                    </tr>
+                    
+                </table>
+                <br>
+                <!-- <script>getWeather()</script> -->
+            </div>
+            
+            <!--<div id="left-col">-->
+                <div id="qotd">
+                   <h3>Quote of the Day</h3>
+                   <span id="quote">"You must be the change you want to see in the world...."</span>
+                   <br><br>
+                   <span id="qsource">M.K. Gandhi</span>
+                   <br><br>
+                   
+                   <!--
+                    <br>
+                    <script type="text/javascript" src="https://www.brainyquote.com/link/quotebr.js"></script>
+                    -->
+                </div>
+                
+                <div id="wotd">
+                    <h3>Word of the Day</h3>
+                    <span id="word">ghost</span>
+                    <span>: </span>
+                    <span id="definition">the spirit of a dead person that someone sees or hears</span>
+                    <br><br>
+                    <!--
+                    <script id="feed-1476131680898933" type="text/javascript" src="http://rss.bloople.net/?url=http%3A%2F%2Fdictionary.reference.com%2Fwordoftheday%2Fwotd.rss&limit=1&showtitle=false&type=js&id=1476131680898933"></script>
+                    -->
+                </div>
+                <div id="nyt">
+                   <h3>New York Times Headlines</h3>
+                   <div id="title1">"&#x2018;Cowardly&#x2019; Killings of Officers Strike a Raw Nerve in Iowa"</div>
+                   <div id="desc1">A gunman&#x2019;s fatal shooting of two officers near Des Moines on Wednesday has police officials trying to deal with another tragedy.</div>
+                   <br>
+                   <div id="title2">"In Chicago, the Cubs&#x2019; Win Brings Baseball Unity, for Now"</div>
+                   <div id="desc2">On the day after the Cubs won their first World Series title in 108 years in an epic, 10-inning game, loyalties were briefly scrambled in a two-team town.</div>
+                   <br>
+                   <div id="title3">"San Francisco Files Lawsuit Against Sinking Millennium Tower"</div>
+                   <div id="desc3">A luxury condominium is fast shaping into a huge legal battle involving developers, the city and owners, and one with stakes befitting Silicon Valley.</div>
+                </div>
+            </div>
+
+            <div id="right-col"> 
+                <div id="calendar">
+                   <iframe src="https://calendar.google.com/calendar/embed?src=lekrigbaum%40gmail.com&ctz=America/New_York" style="border: 0" width="900" height="650" frameborder="0" scrolling="no"></iframe>
+                </div>
+            </div>
+        </main>
+    </body>
+</html>
