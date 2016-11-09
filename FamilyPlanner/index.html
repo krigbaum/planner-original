@@ -1,33 +1,38 @@
 <!DOCTYPE html>
 <html lang="en-US">
-    <head>
-        <title>Family Planner</title>
-        <link rel="stylesheet" type="text/css" href="css/planner.css">
-        <script type="text/javascript" src="js/planner.js"></script>
-        <script type="text/javascript" src="js/date.js"></script>
-        <link href='https://fonts.googleapis.com/css?family=Handlee' rel='stylesheet' type='text/css'>
-    </head>
 
-    <body>
-        <header>
-           <figure>
-                <img src="images/wartree.png" alt="Wartree Logo" />
-                <figcaption>Wartree</figcaption>
-            </figure>
-            <div id="header-title">
-                Family Planner
-                <h2><span id="date">DATE</span>&nbsp;/&nbsp;<span id="time">TIME</span></h2>
-                <script>getDate()</script>
-                <script>getTime()</script>
-            </div>
-        </header>
-       
-        <main>
-           <hr>
-           <div>
-                <div id="left-col">
-                    <div id="weather">
-                        <table id="wunderground">
+<head>
+    <title>Family Planner</title>
+    <link rel="stylesheet" type="text/css" href="css/planner.css">
+    <script type="text/javascript" src="js/planner.js"></script>
+    <script type="text/javascript" src="js/date.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Handlee' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+    <header>
+        <figure>
+            <img src="images/wartree.png" alt="Wartree Logo" />
+            <figcaption>Wartree</figcaption>
+        </figure>
+        <div id="header-title">
+            Family Planner
+            <h2><span id="date">DATE</span>&nbsp;/&nbsp;<span id="time">TIME</span></h2>
+            <script>
+                getDate()
+            </script>
+            <script>
+                getTime()
+            </script>
+        </div>
+    </header>
+
+    <main>
+        <hr>
+        <div>
+            <div id="left-col">
+                <div id="weather">
+                    <table id="wunderground">
                         <tr>
                             <td id="weather-title">Local Weather</td>
                         </tr>
@@ -35,84 +40,79 @@
                             <td id="location">Lafayette, Purdue University Airport, IN (40.41 N / -86.95 W)</td>
                         </tr>
                         <tr>
-                            <td id="updated">Last Updated on Nov 5 2016, 10:54 am EDT</td>
+                            <td id="updated">Last Updated on Nov 6 2016, 10:54 am EST</td>
                         </tr>
-                        </table>
-                        <br>
-                        <table id="current">
-                            <tr>
-                                <td>Current Conditions :</td>
-                                <td id="cond">Fair</td>   
-                            </tr>
-                            <tr>
-                                <td>Temperature :</td>
-                                <td id="temp">48.0 F (8.9 C)</td>
-                            </tr>
-                            <tr>
-                                <td>Humidity :</td>
-                                <td id="humid">83&#37;</td>
-                            </tr>
-                            <tr>
-                                <td>Barometric Pressure :</td>
-                                <td id="pressure">30.42</td>
-                            </tr>
-                            <tr>
-                                <td>Visibility :</td>
-                                <td id="visibility">10.00 mi</td>
-                            </tr>
-                            <tr>
-                                <td>Wind :</td>
-                                <td id="wind">West at 3.5 MPH (3 KT)</td>
-                            </tr>
-                            
-                        </table>
-                        <br>
-                        <!-- <script>getWeather()</script> -->
-                    </div>
-                    
-                    <!--<div id="left-col">-->
-                        <div id="qotd">
-                        <h3>Quote of the Day</h3>
-                        <span id="quote">"An earned compliment costs nothing, but its returns are immeasurable. Very humanly, when we are complimented, when our efforts are appreciated, most of us will usually strive to perform even better down the line. What a return on the investment of delivering a few earned words of praise!"</span>
-                        <br><br>
-                        <span id="qsource">G. Kingsley Ward</span>
-                        <br><br>
-                        
-                        <!--
-                            <br>
-                            <script type="text/javascript" src="https://www.brainyquote.com/link/quotebr.js"></script>
-                            -->
-                        </div>
-                        
-                        <div id="wotd">
-                            <h3>Word of the Day</h3>
-                            <span id="word">ghoulish: </span>
-                            <span>: </span>
-                            <span id="definition">reminding you of death in an unpleasant and frightening way</span>
-                            <br><br>
-                            <!--
-                            <script id="feed-1476131680898933" type="text/javascript" src="http://rss.bloople.net/?url=http%3A%2F%2Fdictionary.reference.com%2Fwordoftheday%2Fwotd.rss&limit=1&showtitle=false&type=js&id=1476131680898933"></script>
-                            -->
-                        </div>
-                        
-                    </div>
-                    <div id="right-col"> 
-                        <div id="calendar">
-                        <iframe src="https://calendar.google.com/calendar/embed?src=lekrigbaum%40gmail.com&ctz=America/New_York" style="border: 0" width="900" height="650" frameborder="0" scrolling="no"></iframe>
-                        </div>
-                    </div>
+                    </table>
+                    <br>
+                    <table id="current">
+                        <tr>
+                            <td>Current Conditions :</td>
+                            <td id="cond">Fair</td>
+                        </tr>
+                        <tr>
+                            <td>Temperature :</td>
+                            <td id="temp">57.0 F (13.9 C)</td>
+                        </tr>
+                        <tr>
+                            <td>Humidity :</td>
+                            <td id="humid">72&#37;</td>
+                        </tr>
+                        <tr>
+                            <td>Barometric Pressure :</td>
+                            <td id="pressure">30.40</td>
+                        </tr>
+                        <tr>
+                            <td>Visibility :</td>
+                            <td id="visibility">10.00 mi</td>
+                        </tr>
+                        <tr>
+                            <td>Wind :</td>
+                            <td id="wind">Variable at 3.5 MPH (3 KT)</td>
+                        </tr>
+                    </table>
+                    <br><span id="tonight">Tonight: Clear, low of 42&deg;</span>
+                    <br><span id="tomorrow">Tomorrow: Mostly sunny and mild, high of 68&deg;</span>
                 </div>
-            <div id="nyt">
-                <h3>New York Times Headlines</h3>
-                <div id="title1">"Immigrants Living &#x2018;On Pause&#x2019; Fear Obama&#x2019;s Leniency Will Not Outlast Election"</div>
-                <div id="desc1">Two families who came to the United States illegally show the enormous risks and weight of unanswered questions in divergent paths toward asylum.</div>
-                <br>
-                <div id="title2">"A Militia Gets Battle Ready for a &#x2018;Gun-Grabbing&#x2019; Clinton Presidency"</div>
-                <div id="desc2">At a militia training camp in Georgia it was clear that no issue motivates members more than guns &#x2014; and the enduring belief that Hillary Clinton is plotting to take them away.</div>
-                <br>
-                <div id="title3">"Gentrification Protesters in Los Angeles Target Art Galleries"</div>
-                <div id="desc3">Spray paint and hurled bottles draw the notice of the police as a neighborhood&#x2019;s Mexican-American residents fear being displaced.</div>
+
+                <div id="qotd">
+                    <h3>Quote of the Day</h3>
+                    <span id="quote">"Twenty years from now you will be more disappointed by the things that you didn't do than by the ones you did do. So throw off the bowlines. Sail away from the safe harbor. Catch the trade winds in your sails. Explore. Dream. Discover."</span>
+                    <br>
+                    <br>
+                    <span id="qsource">Mark Twain</span>
+                    <br>
+                    <br>
+                </div>
+
+                <div id="wotd">
+                    <h3>Word of the Day</h3>
+                    <span id="word">witch: </span>
+                    <span>: </span>
+                    <span id="definition">a woman in stories who has magic powers. A man with magic powers is usually called a wizard.</span>
+                    <br>
+                    <br>
+                </div>
+
             </div>
-        </main>
-    </body>
+            <div id="right-col">
+                <div id="calendar">
+                    <iframe src="https://calendar.google.com/calendar/embed?src=lekrigbaum%40gmail.com&ctz=America/New_York" style="border: 0" width="900" height="650" frameborder="0" scrolling="no"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <div id="nyt">
+            <div id="nyt-title"><h3>New York Times Headlines</h3></div>
+            <div id="title1">"After High-Profile Shootings, Blacks Seek Prosecutor Seats"</div>
+            <div id="desc1">Black lawyers, racial justice groups and liberal donors, led by the hedge fund billionaire George Soros, are combining forces to try to propel more African-American district attorneys into office.</div>
+            <br>
+            <div id="title2">"This Land: Latina Hotel Workers Harness Force of Labor and of Politics in Las Vegas"</div>
+            <div id="desc2">The 57,000-member Culinary Union, which is 56 percent Latino and includes guest room attendants, is a powerful supporter of Nevada Democrats.</div>
+            <br>
+            <div id="title3">"Tense Senate Tussle in New Hampshire Illustrates Murky Finish Line"</div>
+            <div id="desc3">A state that once seemed promising for Democrats in their bid to take back the Senate is now seeing a fight for every vote.</div>
+        </div>
+    </main>
+</body>
+
 </html>

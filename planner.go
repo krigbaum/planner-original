@@ -163,6 +163,85 @@ func Weather() {
 	}
 }
 
+//=======================================================================
+
+func extractForecast(text string, str string, rep int) string {
+	loc := 0
+	start := 0
+	for i := 1; i <= rep; i++ {
+		loc = strings.Index(text[start:], str) + len(str)
+		start = start + loc
+	}
+
+	end := strings.Index(text[start:len(text)], "<")
+	end = start + end
+	return text[start:end]
+}
+
+func getForecast() {
+	url := "http://www.accuweather.com/en/us/west-lafayette-in/47906/weather-forecast/2135952"
+	//var w wotd
+
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
+		os.Exit(1)
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
+		os.Exit(1)
+	}
+
+	fieldName := "day=1\">"
+	period := extractForecast(string(b), fieldName, 4)
+	fmt.Printf("%s: \n", period)
+
+	fieldName = "class=\"large-temp\">"
+	temp := extractForecast(string(b), fieldName, 7)
+	fmt.Printf("%s: \n", temp)
+
+	fieldName = "class=\"cond\">"
+	cond := extractForecast(string(b), fieldName, 3)
+	fmt.Printf("%s: \n", cond)
+
+	tonight := period + ": " + cond + ", low of " + temp
+	fmt.Println(tonight)
+
+	fieldName = "day=2\">"
+	period = extractForecast(string(b), fieldName, 2)
+	fmt.Printf("%s: \n", period)
+
+	fieldName = "class=\"large-temp\">"
+	temp = extractForecast(string(b), fieldName, 8)
+	fmt.Printf("%s: \n", temp)
+
+	fieldName = "class=\"cond\">"
+	cond = extractForecast(string(b), fieldName, 4)
+	fmt.Printf("%s: \n", cond)
+
+	tomorrow := period + ": " + cond + ", high of " + temp
+	fmt.Println(tomorrow)
+	file := HTMLFile
+	mutex.Lock()
+	src, err := ioutil.ReadFile(file)
+	if err != nil {
+		fmt.Printf("Error reading file %s: %v\n", file, err)
+	}
+	memoryFile := string(src)
+
+	memoryFile = replaceByID(memoryFile, "id=\"tonight\">", tonight)
+	memoryFile = replaceByID(memoryFile, "id=\"tomorrow\">", tomorrow)
+
+	err = ioutil.WriteFile(HTMLFile, []byte(memoryFile), 644)
+	mutex.Unlock()
+	if err != nil {
+		fmt.Printf("Error writing to file %s: %v\n", HTMLFile, err)
+	}
+}
+
+//=======================================================================
 func extractWOTD(text string, str string, rep int) string {
 	loc := 0
 	start := 0
@@ -400,16 +479,16 @@ func main() {
 	//if err != nil {
 	//	fmt.Printf("Error reading file %s: %v\n", file, err)
 	//}
+	getForecast()
+	//go Weather()
+	//time.Sleep(30 * time.Second)
+	//go QOTD()
+	//time.Sleep(30 * time.Second)
+	//go WOTD()
+	//time.Sleep(30 * time.Second)
+	//go NYT()
 
-	go Weather()
-	time.Sleep(30 * time.Second)
-	go QOTD()
-	time.Sleep(30 * time.Second)
-	go WOTD()
-	time.Sleep(30 * time.Second)
-	go NYT()
-
-	select {}
+	//select {}
 	/*
 		quote := getQOTD()
 

@@ -87,6 +87,7 @@ table {
     text-align: center;
     margin-left: auto;
     margin-right: auto;
+    font-size: 14pt;
     font-weight: bold;
     color: #FDF902;
 }
@@ -94,12 +95,24 @@ table {
     font-size: 24pt;
 }
 
+#tonight {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #FDF902;
+}
+
+#tomorrow {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #FDF902;
+}
+
 #location {
     font-size: 14pt;
 }
 
 #updated {
-    font=size: 10pt;
+    font-size: 10pt;
 }
 
 #left-col {
@@ -124,7 +137,8 @@ table {
 #quote {
     text-align: center;
     color: #FDF902;
-    font-size: 18pt;
+    font-size: 14pt;
+    font-weight: bold;
 }
 
 #qsource {
@@ -145,27 +159,33 @@ table {
 #word {
     text-align: center;
     color: #FDF902;
-    font-size: 18pt;
+    font-size: 14pt;
     font-weight: bold;
 }
 
 #definition {
     text-align: left;
     color: #FDF902;
-    font-size: 18pt;
+    font-size: 14pt;
     font-style: oblique;
 }
 
 #nyt {
-    padding-top: 40px
+    clear: left;
+    padding-top: 40px;
     border-top: 1px solid black;
     padding-top: 20px;
     width: 100%;
 }
 
+#nyt-title {
+    text-align: center;
+    width: 100%;
+}
+
 #title1 {
     color: white;
-    font-size: 14pt
+    font-size: 14pt;
 }
 
 #desc1 {
@@ -200,7 +220,7 @@ table {
 }
 
 #provider {
-    font-size: 10;
+    font-size: 10pt;
 }
 
 #source {
