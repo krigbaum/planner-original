@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -43,16 +44,20 @@ type nyt struct {
 	description3 string
 }
 
-const qotdURL = "http://quotes.rest/qod.xml"
-const wotdURL = "http://www.macmillandictionary.com/us/wotd/wotdrss.xml"
+//const qotdURL = "http://quotes.rest/qod.xml"
+const qotdURL = "http://feeds.feedburner.com/quotationspage/qotd"
+
+//const wotdURL = "http://www.macmillandictionary.com/us/wotd/wotdrss.xml"
+const wotdURL = "https://wordsmith.org/awad/rss1.xml"
 const weatherURL = "http://w1.weather.gov/xml/current_obs/KLAF.xml"
-const forecastURL = "api.openweathermap.org/data/2.5/forecast?APPID=10ce90b44126ca925bf7b7906e44189c&id=4928096&units=imperial&mode=xml"
+const forecastURL = "http://www.accuweather.com/en/us/west-lafayette-in/47906/weather-forecast/2135952"
 const nytURL = "http://rss.nytimes.com/services/xml/rss/nyt/US.xml"
 
-const wotdReloadInterval = 5
-const qotdReloadInterval = 5
-const weatherReloadInterval = 5
-const nytReloadInterval = 5
+const wotdReloadInterval = 24
+const qotdReloadInterval = 24
+const weatherReloadInterval = 1
+const forecastReloadInterval = 1
+const nytReloadInterval = 1
 
 //const HTMLFile = "/home/krigbaum/devel/go/src/github.com/krigbaum/planner/FamilyPlanner/index.html"
 const HTMLFile = "c:/Users/lekrigbaum/Desktop/go/src/github.com/krigbaum/planner/FamilyPlanner/index.html"
@@ -152,13 +157,14 @@ func getWeather() {
 
 func Weather() {
 	// Initial Weather load on startup
-	fmt.Printf("Starting Weather()\n")
+	log.Println("Initial Weather() Load")
 	getWeather()
 
 	//==================================
 	// Repeat Weather load every weatherdReloadInterval
-	ticker := time.NewTicker(time.Minute * weatherReloadInterval)
+	ticker := time.NewTicker(time.Hour * weatherReloadInterval)
 	for range ticker.C {
+		log.Println("Periodic Weather() Load")
 		getWeather()
 	}
 }
@@ -179,7 +185,7 @@ func extractForecast(text string, str string, rep int) string {
 }
 
 func getForecast() {
-	url := "http://www.accuweather.com/en/us/west-lafayette-in/47906/weather-forecast/2135952"
+	url := forecastURL
 	//var w wotd
 
 	resp, err := http.Get(url)
@@ -195,34 +201,26 @@ func getForecast() {
 	}
 
 	fieldName := "day=1\">"
-	period := extractForecast(string(b), fieldName, 4)
-	fmt.Printf("%s: \n", period)
+	period := extractForecast(string(b), fieldName, 2)
 
 	fieldName = "class=\"large-temp\">"
-	temp := extractForecast(string(b), fieldName, 7)
-	fmt.Printf("%s: \n", temp)
+	temp := extractForecast(string(b), fieldName, 6)
 
 	fieldName = "class=\"cond\">"
 	cond := extractForecast(string(b), fieldName, 3)
-	fmt.Printf("%s: \n", cond)
 
 	tonight := period + ": " + cond + ", low of " + temp
-	fmt.Println(tonight)
 
 	fieldName = "day=2\">"
 	period = extractForecast(string(b), fieldName, 2)
-	fmt.Printf("%s: \n", period)
 
 	fieldName = "class=\"large-temp\">"
-	temp = extractForecast(string(b), fieldName, 8)
-	fmt.Printf("%s: \n", temp)
+	temp = extractForecast(string(b), fieldName, 7)
 
 	fieldName = "class=\"cond\">"
-	cond = extractForecast(string(b), fieldName, 4)
-	fmt.Printf("%s: \n", cond)
+	cond = extractForecast(string(b), fieldName, 3)
 
 	tomorrow := period + ": " + cond + ", high of " + temp
-	fmt.Println(tomorrow)
 	file := HTMLFile
 	mutex.Lock()
 	src, err := ioutil.ReadFile(file)
@@ -238,6 +236,20 @@ func getForecast() {
 	mutex.Unlock()
 	if err != nil {
 		fmt.Printf("Error writing to file %s: %v\n", HTMLFile, err)
+	}
+}
+
+func Forecast() {
+	// Initial WOTD load on startup
+	log.Println("Initial Forecast() Load")
+	getForecast()
+
+	//==================================
+	// Repeat WOTD load every forecastReloadInterval
+	ticker := time.NewTicker(time.Hour * forecastReloadInterval)
+	for range ticker.C {
+		log.Println("Periodic Forecast() Load")
+		getForecast()
 	}
 }
 
@@ -275,8 +287,8 @@ func getWOTD() {
 	w.word = extractWOTD(string(b), fieldName, 2)
 	word := fmt.Sprintf("%s: ", w.word)
 
-	fieldName = "<summary>"
-	w.def = extractWOTD(string(b), fieldName, 1)
+	fieldName = "<description>"
+	w.def = extractWOTD(string(b), fieldName, 2)
 
 	file := HTMLFile
 	mutex.Lock()
@@ -298,13 +310,14 @@ func getWOTD() {
 
 func WOTD() {
 	// Initial WOTD load on startup
-	fmt.Printf("Starting WOTD()\n")
+	log.Println("Initial WOTD() Load")
 	getWOTD()
 
 	//==================================
 	// Repeat WOTD load every wotdReloadInterval
-	ticker := time.NewTicker(time.Minute * wotdReloadInterval)
+	ticker := time.NewTicker(time.Hour * wotdReloadInterval)
 	for range ticker.C {
+		log.Println("Periodic WOTD() Load")
 		getWOTD()
 	}
 }
@@ -338,11 +351,11 @@ func getQOTD() {
 		os.Exit(1)
 	}
 
-	fieldName := "<quote>"
-	q.quote = "\"" + extractQOTD(string(b), fieldName, 1) + "\""
+	fieldName := "<title>"
+	q.source = extractQOTD(string(b), fieldName, 3)
 
-	fieldName = "<author>"
-	q.source = extractQOTD(string(b), fieldName, 1)
+	fieldName = "<description>"
+	q.quote = extractQOTD(string(b), fieldName, 3)
 
 	file := HTMLFile
 	mutex.Lock()
@@ -364,13 +377,14 @@ func getQOTD() {
 
 func QOTD() {
 	// Initial WOTD load on startup
-	fmt.Println("Starting QOTD()")
+	log.Println("Initial QOTD() Load")
 	getQOTD()
 
 	//==================================
 	// Repeat WOTD load every qotdReloadInterval
-	ticker := time.NewTicker(time.Minute * qotdReloadInterval)
+	ticker := time.NewTicker(time.Hour * qotdReloadInterval)
 	for range ticker.C {
+		log.Println("Periodic QOTD() Load")
 		getQOTD()
 	}
 }
@@ -446,84 +460,39 @@ func getNYT() {
 
 func NYT() {
 	// Initial NYT load on startup
-	fmt.Printf("Starting NYT()\n")
+	log.Println("Initial NYT() Load\n")
 	getNYT()
 
 	//==================================
 	// Repeat NYT load every nytReloadInterval
-	ticker := time.NewTicker(time.Minute * nytReloadInterval)
+	ticker := time.NewTicker(time.Hour * nytReloadInterval)
 	for range ticker.C {
+		log.Println("Periodic NYT() Load\n")
 		getNYT()
 	}
 }
 
 func replaceByID(src string, old string, new string) string {
-	//fmt.Println("new = ", new)
 	i := strings.Index(src, old)
 	i = i + len(old)
 	substr1 := src[:i]
-	//fmt.Println("substr1[len(substr1) - 25:] = ", substr1[len(substr1)-25:])
-	//fmt.Println()
 	substr2 := src[i:]
-	//fmt.Println("substr2[:25] = ", substr2[:25])
 	i = strings.Index(substr2, "</")
-	//fmt.Println("i = ", i)
 	substr2 = substr2[i:]
 	src = substr1 + new + substr2
 	return src
 }
 
 func main() {
-	//file := HTMLFile
-	//src, err := ioutil.ReadFile(file)
-	//if err != nil {
-	//	fmt.Printf("Error reading file %s: %v\n", file, err)
-	//}
-	getForecast()
-	//go Weather()
-	//time.Sleep(30 * time.Second)
-	//go QOTD()
-	//time.Sleep(30 * time.Second)
-	//go WOTD()
-	//time.Sleep(30 * time.Second)
-	//go NYT()
+	go Weather()
+	time.Sleep(15 * time.Second)
+	go getForecast()
+	time.Sleep(15 * time.Second)
+	go QOTD()
+	time.Sleep(15 * time.Second)
+	go WOTD()
+	time.Sleep(15 * time.Second)
+	go NYT()
 
-	//select {}
-	/*
-		quote := getQOTD()
-
-		weather := getWeather()
-		location := fmt.Sprintf("%s (%s N / %s W)", weather.location, weather.latitude, weather.longitude)
-		//fmt.Printf("Observered:          %s\n", weather.updated)
-		//fmt.Printf("Temperature:         %s\n", weather.temperature)
-		//fmt.Printf("Humidity:            %s%%\n", weather.humidity)
-		//fmt.Printf("Wind:                %s\n", weather.wind)
-		//fmt.Printf("Barometric Presure:  %s\n", weather.pressure)
-		//fmt.Printf("Visibilty:           %s mi\n", weather.visibility)
-
-		file := "c:/users/lekrigbaum/Desktop/Family Planner/index.html"
-		src, err := ioutil.ReadFile(file)
-		if err != nil {
-			fmt.Printf("Error reading file %s: %v\n", file, err)
-		}
-
-		newfile := replaceByID(string(src), "id=\"quote\">", quote.quote)
-		newfile = replaceByID(newfile, "id=\"qsource\">", quote.source)
-
-		newfile = replaceByID(newfile, "id=\"word\">", entry.word)
-		newfile = replaceByID(newfile, "id=\"definition\">", entry.definition)
-
-		newfile = replaceByID(newfile, "id=\"location\">", location)
-		newfile = replaceByID(newfile, "id=\"updated\">", weather.updated)
-		newfile = replaceByID(newfile, "id=\"cond\">", weather.conditions)
-		newfile = replaceByID(newfile, "id=\"temp\">", weather.temperature)
-		newfile = replaceByID(newfile, "id=\"humid\">", weather.humidity)
-		newfile = replaceByID(newfile, "id=\"pressure\">", weather.pressure)
-		newfile = replaceByID(newfile, "id=\"visibility\">", weather.visibility)
-		newfile = replaceByID(newfile, "id=\"wind\">", weather.wind)
-		err = ioutil.WriteFile(file, []byte(newfile), 0644)
-		if err != nil {
-			fmt.Printf("Error writing to file %s: %v\n", file, err)
-		}
-	*/
+	select {}
 }

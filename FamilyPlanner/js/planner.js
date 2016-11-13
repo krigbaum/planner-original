@@ -11,10 +11,10 @@ function getDate() {
 }
 
 function getTime() {
-    var setInterval;
+    //var setInterval;
     var hour;
     var period
-    setInterval(function () {
+    setInterval(function(){
     var today = new Date();
     var hours = today.getHours();
     if (hours >= 12) {
