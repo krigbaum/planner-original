@@ -44,23 +44,20 @@ type nyt struct {
 	description3 string
 }
 
-//const qotdURL = "http://quotes.rest/qod.xml"
 const qotdURL = "http://feeds.feedburner.com/quotationspage/qotd"
-
-//const wotdURL = "http://www.macmillandictionary.com/us/wotd/wotdrss.xml"
 const wotdURL = "https://wordsmith.org/awad/rss1.xml"
 const weatherURL = "http://w1.weather.gov/xml/current_obs/KLAF.xml"
 const forecastURL = "http://www.accuweather.com/en/us/west-lafayette-in/47906/weather-forecast/2135952"
 const nytURL = "http://rss.nytimes.com/services/xml/rss/nyt/US.xml"
 
-const wotdReloadInterval = 24
-const qotdReloadInterval = 24
+const wotdReloadInterval = 12
+const qotdReloadInterval = 12
 const weatherReloadInterval = 1
 const forecastReloadInterval = 1
 const nytReloadInterval = 1
 
 //const HTMLFile = "/home/krigbaum/devel/go/src/github.com/krigbaum/planner/FamilyPlanner/index.html"
-const HTMLFile = "c:/Users/lekrigbaum/Desktop/go/src/github.com/krigbaum/planner/FamilyPlanner/index.html"
+const HTMLFile = "c:/Users/lekrigbaum/Desktop/go/src/github.com/krigbaum/planner/index.html"
 
 var mutex = &sync.Mutex{}
 
@@ -84,12 +81,14 @@ func getWeather() {
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
+		log.Printf("\n***** Error: Exit on http.Get(%s) in function getWeather() *****\n\n", url)
 		os.Exit(1)
 	}
 	b, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
+		log.Printf("\n***** Error: Exit on resp.Body,Close() in function getWeather() *****\n\n")
 		os.Exit(1)
 	}
 
@@ -136,6 +135,7 @@ func getWeather() {
 	src, err := ioutil.ReadFile(file)
 	if err != nil {
 		fmt.Printf("Error reading file %s: %v\n", file, err)
+		log.Printf("\n***** Error: Exit on ioutil.ReadFile(%s) with errcode %d in function getWeather() *****\n\n", file, err)
 	}
 	memoryFile := string(src)
 
@@ -152,6 +152,7 @@ func getWeather() {
 	mutex.Unlock()
 	if err != nil {
 		fmt.Printf("Error writing to file %s: %v\n", HTMLFile, err)
+		log.Printf("\n***** Error: Exit on ioutil.WriteFile(%s) with errcode %d in function getWeather() *****\n\n", file, err)
 	}
 }
 
@@ -167,6 +168,7 @@ func Weather() {
 		log.Println("Periodic Weather() Load")
 		getWeather()
 	}
+	log.Printf("\n***** Error: Exit on range ticker in function Weather\n\n")
 }
 
 //=======================================================================
@@ -191,34 +193,37 @@ func getForecast() {
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
+		log.Printf("\n***** Error: Exit on http.Get(%s) in function getForecast() *****\n\n", url)
 		os.Exit(1)
 	}
 	b, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
+		log.Printf("\n***** Error: Exit on resp.Body,Close() in function getForecast() *****\n\n")
 		os.Exit(1)
 	}
+	parts := strings.SplitN(string(b), "Tonight", 2)
 
-	fieldName := "day=1\">"
-	period := extractForecast(string(b), fieldName, 2)
+	//fieldName := "day=1\">"
+	period := "Tonight"
 
-	fieldName = "class=\"large-temp\">"
-	temp := extractForecast(string(b), fieldName, 6)
+	fieldName := "<span class=\"large-temp\">"
+	temp := extractForecast(parts[1], fieldName, 1)
 
-	fieldName = "class=\"cond\">"
-	cond := extractForecast(string(b), fieldName, 3)
+	fieldName = "<span class=\"cond\">"
+	cond := extractForecast(parts[1], fieldName, 1)
 
 	tonight := period + ": " + cond + ", low of " + temp
 
 	fieldName = "day=2\">"
-	period = extractForecast(string(b), fieldName, 2)
+	period = extractForecast(parts[1], fieldName, 2)
 
-	fieldName = "class=\"large-temp\">"
-	temp = extractForecast(string(b), fieldName, 7)
+	fieldName = "<span class=\"large-temp\">"
+	temp = extractForecast(parts[1], fieldName, 2)
 
-	fieldName = "class=\"cond\">"
-	cond = extractForecast(string(b), fieldName, 3)
+	fieldName = "<span class=\"cond\">"
+	cond = extractForecast(parts[1], fieldName, 2)
 
 	tomorrow := period + ": " + cond + ", high of " + temp
 	file := HTMLFile
@@ -226,6 +231,7 @@ func getForecast() {
 	src, err := ioutil.ReadFile(file)
 	if err != nil {
 		fmt.Printf("Error reading file %s: %v\n", file, err)
+		log.Printf("\n***** Error: Exit on ioutil.ReadFile(%s) with errcode %d in function getForecast() *****\n\n", file, err)
 	}
 	memoryFile := string(src)
 
@@ -236,6 +242,7 @@ func getForecast() {
 	mutex.Unlock()
 	if err != nil {
 		fmt.Printf("Error writing to file %s: %v\n", HTMLFile, err)
+		log.Printf("\n***** Error: Exit on ioutil.WriteFile(%s) with errcode %d in function getForecast() *****\n\n", file, err)
 	}
 }
 
@@ -251,6 +258,7 @@ func Forecast() {
 		log.Println("Periodic Forecast() Load")
 		getForecast()
 	}
+	log.Printf("\n***** Error: Exit on range ticker in function Weather\n\n")
 }
 
 //=======================================================================
@@ -445,11 +453,17 @@ func getNYT() {
 	memoryFile := string(src)
 
 	memoryFile = replaceByID(memoryFile, "id=\"title1\">", n.title1)
+	log.Printf("Wrote \"%s\" to title1", n.title1)
 	memoryFile = replaceByID(memoryFile, "id=\"desc1\">", n.description1)
+	log.Printf("Wrote \"%s\" to description1", n.description1)
 	memoryFile = replaceByID(memoryFile, "id=\"title2\">", n.title2)
+	log.Printf("Wrote \"%s\" to title2", n.title2)
 	memoryFile = replaceByID(memoryFile, "id=\"desc2\">", n.description2)
+	log.Printf("Wrote \"%s\" to description2", n.description2)
 	memoryFile = replaceByID(memoryFile, "id=\"title3\">", n.title3)
+	log.Printf("Wrote \"%s\" to title3", n.title3)
 	memoryFile = replaceByID(memoryFile, "id=\"desc3\">", n.description3)
+	log.Printf("Wrote \"%s\" to description3", n.description3)
 
 	err = ioutil.WriteFile(HTMLFile, []byte(memoryFile), 644)
 	mutex.Unlock()
@@ -486,13 +500,13 @@ func replaceByID(src string, old string, new string) string {
 func main() {
 	go Weather()
 	time.Sleep(15 * time.Second)
-	go getForecast()
+	go Forecast()
 	time.Sleep(15 * time.Second)
 	go QOTD()
 	time.Sleep(15 * time.Second)
 	go WOTD()
-	time.Sleep(15 * time.Second)
-	go NYT()
+	//time.Sleep(15 * time.Second)
+	//go NYT()
 
 	select {}
 }

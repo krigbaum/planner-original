@@ -1,14 +1,16 @@
-<!DOCTYPESouthwest at 8.1 MPH (7 KT)</title>
-    <link rel="stylesheet" type="text/css" href="css/planner.css">
-    <script type="text/javascript" src="js/planner.js"></script>
-    <script type="text/javascript" src="js/date.js"></script>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Family Planner</title>
+    <link rel="stylesheet" type="text/css" href="FamilyPlanner/css/planner.css">
+    <script type="text/javascript" src="FamilyPlanner/js/planner.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Handlee' rel='stylesheet' type='text/css'>
 </head>
 
 <body>
     <header>
         <figure>
-            <img src="images/wartree.png" alt="Wartree Logo" />
+            <img src="FamilyPlanner/images/wartree.png" alt="Wartree Logo" />
             <figcaption>Wartree</figcaption>
         </figure>
         <div id="header-title">
@@ -28,7 +30,7 @@
         <div>
             <div id="left-col">
                 <div id="weather">
-                    <table id="wunderground">
+                    <table id="weather-table">
                         <tr>
                             <td id="weather-title">Local Weather</td>
                         </tr>
@@ -36,59 +38,58 @@
                             <td id="location">Lafayette, Purdue University Airport, IN (40.41 N / -86.95 W)</td>
                         </tr>
                         <tr>
-                            <td id="updated">Last Updated on Nov 13 2016, 12:54 pm EST</td>
+                            <td id="updated">Last Updated on Nov 20 2016, 5:54 pm EST</td>
                         </tr>
                     </table>
                     <br>
                     <table id="current">
                         <tr>
                             <td id="label">Current Conditions :</td>
-                            <td id="content">Overcast</td>
+                            <td id="cond">Mostly Cloudy</td>
                         </tr>
                         <tr>
                             <td id="label">Temperature :</td>
-                            <td id="content">48.0 F (8.9 C)</td>
+                            <td id="temp">30.0 F (-1.1 C)</td>
                         </tr>
                         <tr>
                             <td id="label">Humidity :</td>
-                            <td id="content">77&#37;</td>
+                            <td id="humid">72&#37;</td>
                         </tr>
                         <tr>
                             <td id="label">Barometric Pressure :</td>
-                            <td id="content">30.25</td>
+                            <td id="pressure">30.30</td>
                         </tr>
                         <tr>
                             <td id="label">Visibility :</td>
-                            <td id="content">10.00 mi</td>
+                            <td id="visibility">10.00 mi</td>
                         </tr>
                         <tr>
                             <td id="label">Wind :</td>
-                            <td id="content">North at 6.9 MPH (6 KT)</td>
+                            <td id="wind">Northwest at 4.6 MPH (4 KT)</td>
                         </tr>
                     </table>
-                    <br><span id="tonight">Today: Patchy clouds, low of 54&deg;</span>
-                    <br><span id="tomorrow">Tomorrow: Patchy clouds, high of 31&deg;</span>
+                    <br><span id="tonight">Tonight: Clear and cold, low of 19&deg;</span>
+                    <br><span id="tomorrow">Tomorrow: Plenty of sun, high of 42&deg;</span>
                 </div>
 
                 <div id="qotd">
                     <h3>Quote of the Day</h3>
-                    <span id="quote">"We hate some persons because we do not know them; and we will not know them because we hate them."</span>
+                    <span id="quote">"Finance is the art of passing money from hand to hand until it finally disappears."</span>
                     <br>
                     <br>
-                    <span id="qsource">Charles Caleb Colton</span>
+                    <span id="qsource">Robert W. Sarnoff</span>
                     <br>
                     <br>
                 </div>
 
                 <div id="wotd">
                     <h3>Word of the Day</h3>
-                    <span id="word">comport: </span>
+                    <span id="word">defenestration: </span>
                     <span>: </span>
-                    <span id="definition">verb tr.: To conduct oneself. verb intr.: To agree with.</span>
+                    <span id="definition">Throwing someone or something out of a window.</span>
                     <br>
                     <br>
                 </div>
-
             </div>
             <div id="right-col">
                 <div id="calendar">
@@ -96,18 +97,22 @@
                 </div>
             </div>
         </div>
-
+        <!--
         <div id="nyt">
             <div id="nyt-title"><h3>New York Times Headlines</h3></div>
-            <div id="title1">"Protesters Take Anti-Trump Message to His Doorstep, and Plan Next Steps"</div>
-            <div id="desc1">Beyond the commotion in the streets, liberal activists are preparing legislative challenges and getting ready to support social services they assume will be gutted.</div>
+            <div id="title1">"At Iowa High School, Election Results Kindle Tensions and Protests"</div>
+            <div id="desc1">Like many other schools around the country since the election, West High has become a microcosm of the United States, roiled by divisions and mistrust.</div>
             <br>
-            <div id="title2">"Grand Canyon Journal: His Job? To Power Up the Grand Canyon"</div>
-            <div id="desc2">Without power, water pumps in the park don&#x2019;t work. Without pumps, there&#x2019;s no water in toilets or faucets. Without water, the park must close. Enter Kevin Hartigan.</div>
+            <div id="title2">"Along the Autism Spectrum, a Path Through Campus Life"</div>
+            <div id="desc2">The first generation of students with an autism diagnosis is fanning out to schools across the country. They face a complex array of academic and social challenges.</div>
             <br>
-            <div id="title3">"Reports of Bias-Based Attacks Tick Upward After Election"</div>
-            <div id="desc3">Civil rights groups say their inboxes and call centers are lighting up with reports of abuse, but caution that it&#x2019;s too soon to say whether the trend will last.</div>
+            <div id="title3">"Bring a Yoga Mat and an Open Mind. Goats Are Provided."</div>
+            <div id="desc3">In a pastoral setting in Oregon, a yoga class is joined by four-legged companions.</div>
         </div>
+-->
+        <script>
+            refreshFromHTML()
+        </script>
     </main>
 </body>
 

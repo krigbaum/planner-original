@@ -1,5 +1,5 @@
 html {
-    background: url(../images/red-background2.jpg) no-repeat center center fixed; 
+    background: url(../FamilyPlanner/images/red-background.jpg) no-repeat center center fixed;
     background-size: cover;
 }
 
@@ -13,7 +13,7 @@ header {
 }
 
 figure {
-	float: left;
+    float: left;
     margin-right: 0;
     font-size: 10pt;
     text-align: center;
@@ -22,13 +22,14 @@ figure {
 h1 {
     font-family: 'Handlee', cursive;
     font-size: 84pt;
-    text-align: center; 
+    font-weight: bold;
+    text-align: center;
 }
 
 h2 {
     text-align: center;
     color: white;
-    font-size: 24pt;
+    font-size: 32pt;
 }
 
 h3 {
@@ -36,13 +37,10 @@ h3 {
     color: white;
 }
 
-table {
-
-}
-
 #header-title {
     height: 180px;
-    margin-top: 14px;
+    /*margin-top: 14px;*/
+    
     margin-left: 0;
     margin-right: 95pt;
     width: 74%;
@@ -50,10 +48,6 @@ table {
     text-align: center;
     font-family: 'Handlee', cursive;
     font-size: 72pt;
-}
-
-#date-time {
-    
 }
 
 #date-time {
@@ -75,7 +69,7 @@ table {
     border-bottom: 1px solid black;
 }
 
-#wunderground {
+#weather-table {
     text-align: center;
     margin-left: auto;
     margin-right: auto;
