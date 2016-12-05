@@ -55,9 +55,9 @@ const qotdReloadInterval = 12
 const weatherReloadInterval = 1
 const forecastReloadInterval = 1
 const nytReloadInterval = 1
+const timeCheckInterval = 3
 
-//const HTMLFile = "/home/krigbaum/devel/go/src/github.com/krigbaum/planner/FamilyPlanner/index.html"
-const HTMLFile = "c:/Users/lekrigbaum/Desktop/go/src/github.com/krigbaum/planner/index.html"
+const HTMLFile = "/home/pi/devel/src/github.com/pi/planner/index.html"
 
 var mutex = &sync.Mutex{}
 
@@ -82,7 +82,8 @@ func getWeather() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
 		log.Printf("\n***** Error: Exit on http.Get(%s) in function getWeather() *****\n\n", url)
-		os.Exit(1)
+		//os.Exit(1)
+		return
 	}
 	b, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
@@ -171,8 +172,6 @@ func Weather() {
 	log.Printf("\n***** Error: Exit on range ticker in function Weather\n\n")
 }
 
-//=======================================================================
-
 func extractForecast(text string, str string, rep int) string {
 	loc := 0
 	start := 0
@@ -194,7 +193,8 @@ func getForecast() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
 		log.Printf("\n***** Error: Exit on http.Get(%s) in function getForecast() *****\n\n", url)
-		os.Exit(1)
+		//os.Exit(1)
+		return
 	}
 	b, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
@@ -282,7 +282,8 @@ func getWOTD() {
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
-		os.Exit(1)
+		//os.Exit(1)
+		return
 	}
 	b, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
@@ -350,7 +351,8 @@ func getQOTD() {
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
-		os.Exit(1)
+		//os.Exit(1)
+		return
 	}
 	b, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
@@ -497,14 +499,34 @@ func replaceByID(src string, old string, new string) string {
 	return src
 }
 
+func TimeCheck() {
+	// Initial Weather load on startup
+	log.Println("***** Time Check *****")
+
+	// Repeat Time Check every timeCheckInterval minutes
+	ticker := time.NewTicker(time.Minute * timeCheckInterval)
+	for range ticker.C {
+		log.Println("***** Time Check *****")
+	}
+	log.Printf("\n***** Error: Exit on range ticker in function TimeCheck\n\n")
+}
+
 func main() {
+	log.Printf("\n\n")
+	log.Printf("****************************************************************\n")
+	log.Printf("*                                                              *\n")
+	log.Printf("*                  Starting Family Planner                     *\n")
+	log.Printf("*                                                              *\n")
+	log.Printf("****************************************************************\n\n")
+
 	go Weather()
-	time.Sleep(15 * time.Second)
+	time.Sleep(10 * time.Second)
 	go Forecast()
-	time.Sleep(15 * time.Second)
+	time.Sleep(10 * time.Second)
 	go QOTD()
-	time.Sleep(15 * time.Second)
+	time.Sleep(1 * time.Second)
 	go WOTD()
+	go TimeCheck()
 	//time.Sleep(15 * time.Second)
 	//go NYT()
 

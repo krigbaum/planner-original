@@ -1,5 +1,5 @@
 html {
-    background: url(../FamilyPlanner/images/red-background.jpg) no-repeat center center fixed;
+    background: url(../images/red-background.jpg) no-repeat center center fixed;
     background-size: cover;
 }
 
@@ -17,6 +17,10 @@ figure {
     margin-right: 0;
     font-size: 10pt;
     text-align: center;
+}
+
+body {
+    overflow:hidden;
 }
 
 h1 {
@@ -89,6 +93,16 @@ h3 {
 #label {
     text-align: right;
     padding-right: 5px;
+}
+
+#temp,
+#cond,
+#humid,
+#pressure,
+#visibility,
+#wind {
+    text-align: left;
+    padding-left: 5px;
 }
 
 #content {

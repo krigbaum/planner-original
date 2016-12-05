@@ -17,22 +17,12 @@ function getTime() {
     setInterval(function() {
         var today = new Date();
         var hours = today.getHours();
-        if (hours >= 12) {
-            period = "PM";
-        } else {
-            period = "AM";
-        }
-        if (hours > 12) {
-            hour = hours - 12;
-        } else {
-            hour = hours;
-        }
         var minutes = today.getMinutes();
         var minute = minutes.toString();
         if (minute.length < 2) {
             minute = "0" + minutes;
         }
-        var timeString = hour + ":" + minute + " " + period;
+        var timeString = hours + ":" + minute;
         document.getElementById("time").innerHTML = timeString;
     }, 500);
 }
@@ -44,7 +34,6 @@ function refreshFromHTML() {
 
     setInterval(function() {
         location.reload(false);
-        console.log("Refreshed Screen");
     }, 300000);
 }
 
