@@ -123,6 +123,8 @@ func getWeather() {
 
 	fieldName = "<wind_string>"
 	w.wind = extractWeather(string(b), fieldName, 1)
+	winds := strings.Split(w.wind, "(")
+	w.wind = winds[0]
 
 	fieldName = "<pressure_in>"
 	w.pressure = extractWeather(string(b), fieldName, 1)
