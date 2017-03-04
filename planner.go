@@ -45,8 +45,10 @@ type nyt struct {
 	description3 string
 }
 
-const qotdURL = "http://feeds.feedburner.com/quotationspage/qotd"
-const wotdURL = "https://wordsmith.org/awad/rss1.xml"
+const DEBUG = true
+
+const qotdURL = "https://www.quotesdaddy.com/feed"
+const wotdURL = "https://www.merriam-webster.com/word-of-the-day"
 const weatherURL = "http://w1.weather.gov/xml/current_obs/KLAF.xml"
 const forecastURL = "http://www.accuweather.com/en/us/west-lafayette-in/47906/weather-forecast/2135952"
 const nytURL = "http://rss.nytimes.com/services/xml/rss/nyt/US.xml"
@@ -59,7 +61,8 @@ const nytReloadInterval = 1
 const timeCheckInterval = 3
 
 const HTMLFile = "/home/pi/devel/src/github.com/pi/planner/index.html"
-
+//const HTMLFile = "c:/Users/lekrigbaum/Desktop/go/src/github.com/krigbaum/planner/index.html"
+//const HTMLFile = "c:/wamp64/www/planner/index.html"
 var mutex = &sync.Mutex{}
 
 func extractWeather(text string, str string, rep int) string {
@@ -255,7 +258,7 @@ func Forecast() {
 	getForecast()
 
 	//==================================
-	// Repeat WOTD load every forecastReloadInterval
+	// Repeat forecast load every forecastReloadInterval
 	ticker := time.NewTicker(time.Hour * forecastReloadInterval)
 	for range ticker.C {
 		log.Println("Periodic Forecast() Load")
@@ -265,6 +268,7 @@ func Forecast() {
 }
 
 //=======================================================================
+
 func extractWOTD(text string, str string, rep int) string {
 	loc := 0
 	start := 0
@@ -272,13 +276,26 @@ func extractWOTD(text string, str string, rep int) string {
 		loc = strings.Index(text[start:], str) + len(str)
 		start = start + loc
 	}
-
-	end := strings.Index(text[start:len(text)], "</")
+	end := -1
+	if str == "<dt>" {
+		end = strings.Index(text[start:len(text)], "</dt>")
+	} else {
+		end = strings.Index(text[start:len(text)], "</")
+	}
 	end = start + end
 	return text[start:end]
 }
 
-func getWOTD() {
+func extractNumberOfDefs(text string, str string) int {
+	//loc := 0
+	//start := 0
+	//reps = strconv.Atoi(strings.LastIndex(text[start:], str) + len(str))
+	reps := strings.Count(text, str)
+
+	return reps
+}
+
+func getQuery() string {
 	url := wotdURL
 	var w wotd
 
@@ -290,7 +307,7 @@ func getWOTD() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
 		//os.Exit(1)
-		return
+		return "ERR"
 	}
 	b, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
@@ -300,22 +317,95 @@ func getWOTD() {
 	}
 
 	fieldName := "<title>"
-	w.word = extractWOTD(string(b), fieldName, 2)
-	word := fmt.Sprintf("%s: ", w.word)
+	w.word = extractWOTD(string(b), fieldName, 1)
+	wotd := fmt.Sprintf("%s: ", w.word)
+	split1 := strings.Split(wotd, ": ")
+	split2 := strings.Split(split1[1], " ")
+	word := strings.ToLower(split2[0])
 
-	fieldName = "<description>"
-	w.def = extractWOTD(string(b), fieldName, 2)
+	queryPt1 := "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/"
+	queryPt2 := "?key=6becb26a-c8cc-4b72-813f-55849be7b7a5"
+	query := queryPt1 + word + queryPt2
+
+	return query
+}
+
+func getWOTD() {
+	query := getQuery()
+	if query == "ERR" {
+		return
+	}
+
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	resp, err := client.Get(query)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
+		//os.Exit(1)
+		return
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", query, err)
+		os.Exit(1)
+	}
+
+    if DEBUG {
+        fmt.Println("WOTD returned: ", string(b))
+    }
+    
+	fieldName := "<ew>"
+	word := extractWOTD(string(b), fieldName, 1)
+
+	fieldName = "<pr>"
+	pronounce := "(" + extractWOTD(string(b), fieldName, 1) + ")"
+
+	fieldName = "<fl>"
+	pos := extractWOTD(string(b), fieldName, 1)
+
+	fieldName = "<sn>"
+	//numDefs, _ := strconv.Atoi(extractNumberOfDefs(string(b), fieldName))
+	numDefs := extractNumberOfDefs(string(b), fieldName)
+    
+    if DEBUG {
+        fmt.Println("numDefs is: ", numDefs)
+    }
+    
+	fieldName = "<dt>"
+	defs := ""
+	reps := 1
+	for reps <= numDefs {
+		//tmp := extractWOTD(string(b), fieldName, reps + 1)
+		//fmt.Println("tmp = ", tmp)
+		defs = defs + strconv.Itoa(reps) + stripHTML(extractWOTD(string(b), fieldName, reps)) + "<br>"
+		
+        if DEBUG {
+		  fmt.Printf("line %d) %s\n", reps, defs)
+        }
+        reps++
+	}
+    
+    if DEBUG {
+        fmt.Println("definition: ", defs)
+    }
 
 	file := HTMLFile
+	var mutex = &sync.Mutex{}
 	mutex.Lock()
 	src, err := ioutil.ReadFile(file)
 	if err != nil {
 		fmt.Printf("Error reading file %s: %v\n", file, err)
 	}
 	memoryFile := string(src)
-
+	//fmt.Println(memoryFile)
 	memoryFile = replaceByID(memoryFile, "id=\"word\">", word)
-	memoryFile = replaceByID(memoryFile, "id=\"definition\">", w.def)
+	memoryFile = replaceByID(memoryFile, "id=\"pronounce\">", pronounce)
+	memoryFile = replaceByID(memoryFile, "id=\"pos\">", pos)
+	memoryFile = replaceByID(memoryFile, "id=\"definitions\">", defs)
 
 	err = ioutil.WriteFile(HTMLFile, []byte(memoryFile), 644)
 	mutex.Unlock()
@@ -368,11 +458,11 @@ func getQOTD() {
 		os.Exit(1)
 	}
 
-	fieldName := "<title>"
-	q.source = extractQOTD(string(b), fieldName, 3)
+	fieldName := "<description>"
+	q.quote = extractQOTD(string(b), fieldName, 2)
 
-	fieldName = "<description>"
-	q.quote = extractQOTD(string(b), fieldName, 3)
+	//fieldName = "<description>"
+	//q.quote = extractQOTD(string(b), fieldName, 3)
 
 	file := HTMLFile
 	mutex.Lock()
@@ -383,7 +473,7 @@ func getQOTD() {
 	memoryFile := string(src)
 
 	memoryFile = replaceByID(memoryFile, "id=\"quote\">", q.quote)
-	memoryFile = replaceByID(memoryFile, "id=\"qsource\">", q.source)
+	//memoryFile = replaceByID(memoryFile, "id=\"qsource\">", q.source)
 
 	err = ioutil.WriteFile(HTMLFile, []byte(memoryFile), 644)
 	mutex.Unlock()
@@ -398,7 +488,7 @@ func QOTD() {
 	getQOTD()
 
 	//==================================
-	// Repeat WOTD load every qotdReloadInterval
+	// Repeat QOTD load every qotdReloadInterval
 	ticker := time.NewTicker(time.Hour * qotdReloadInterval)
 	for range ticker.C {
 		log.Println("Periodic QOTD() Load")
@@ -504,6 +594,38 @@ func replaceByID(src string, old string, new string) string {
 	substr2 = substr2[i:]
 	src = substr1 + new + substr2
 	return src
+}
+
+func stripHTML(orig string) string {
+	//fmt.Println("Original string: ", orig)
+	//fmt.Println()
+	result := ""
+	start := 0
+	end := strings.Index(orig, "<")
+	// Another HTML Tag found.
+	for end != -1 {
+		result = result + orig[start:end]
+		//fmt.Println("1) result = ", result)
+		orig = strings.SplitN(orig, ">", 2)[1]
+		//fmt.Println("2) str = ", orig)
+		end = strings.Index(orig, "<")
+		//fmt.Println("start =", start)
+		//fmt.Println("end = ", end)
+		// No other HTML tags found
+		if end == -1 {
+			result = result + orig
+			return result
+		}
+		//fmt.Println()
+		//fmt.Println("start =", start)
+		//fmt.Println("result = ", result)
+		end = strings.Index(orig, "<")
+		//fmt.Println("end = ", end)
+		//fmt.Println()
+		//end := strings.Index(str, ">")
+	}
+	result = orig
+	return result
 }
 
 func TimeCheck() {

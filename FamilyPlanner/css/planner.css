@@ -39,6 +39,7 @@ h2 {
 h3 {
     font-size: 24pt;
     color: white;
+    margin-bottom: 3px;
 }
 
 #header-title {
@@ -182,10 +183,21 @@ h3 {
     font-weight: bold;
 }
 
-#definition {
-    text-align: left;
+#pronounce {
     color: #FDF902;
     font-size: 14pt;
+}
+
+#pos {
+    color: #FDF902;
+    font-size: 14pt;
+    font-style: italic;
+}
+
+#definitions {
+    text-align: left;
+    color: #FDF902;
+    font-size: 12pt;
     font-style: oblique;
 }
 
